@@ -26,6 +26,7 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("pitch/", include("pitch.urls")),
     path("", RedirectView.as_view(url="pitch/")),
+    path("accounts/", include("account.urls")),
     path("accounts/", include("django.contrib.auth.urls")),
     path("accounts/", RedirectView.as_view(url="login/")),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

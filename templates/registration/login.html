@@ -27,9 +27,11 @@
             <button type="submit" class="btn btn-primary py-0">Login</button>
             <input type="hidden" name="next" value="{{ next }}">
         </form>
-        {# Assumes you setup the password_reset view in your URLconf #}
         <p class="pt-2">
             <a class="badge bg-primary text-wrap" href="{% url 'password_reset' %}">Reset password?</a>
+        </p>
+        <p class="pt-2">
+            <a class="badge bg-primary text-wrap" href="{% url 'signup' %}">Sign Up?</a>
         </p>
     </div>
 {% endblock %}
