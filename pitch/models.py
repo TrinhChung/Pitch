@@ -86,13 +86,10 @@ class Comment(models.Model):
 
 
 class Image(models.Model):
-    """Model representing a book genre."""
-
-    link = models.CharField(
-        max_length=500, help_text="Enter a link of image (e.g.Science Fiction)"
+    image = models.ImageField(
+        upload_to="uploads/",
+        default="default-image.jpg",
+        null=False,
+        help_text="Image of the pitch",
     )
     pitch = models.ForeignKey(Pitch, on_delete=models.CASCADE)
-
-    def get_absolute_url(self):
-        """Returns the url to access a particular author instance."""
-        return self.link
