@@ -60,6 +60,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "pitch.apps.PitchConfig",
+    "account.apps.AccountConfig",
     "jquery",
     "bootstrap_datepicker_plus",
     "bootstrap5",
@@ -157,6 +158,13 @@ INTERNAL_IPS = [
     "127.0.0.1",
     # ...
 ]
-
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = "smtp.gmail.com"
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = "chungtrinh2k2@gmail.com"
+EMAIL_HOST_PASSWORD = "ptfanznmenvpxfij"
+
+DEFAULT_FROM_EMAIL = "chungtrinh2k2@gmail.com"
+
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
