@@ -9,28 +9,29 @@ from django.core.mail import BadHeaderError, send_mail
 from django.http import HttpResponse, HttpResponseRedirect
 import uuid
 from .models import EmailVerify
+from account.mail import send_mail_custom
+from project1.settings import HOST
 
 
 def sign_up(request):
     if request.method == "POST":
         form = RegisterForm(request.POST)
-        print("Register")
         if form.is_valid():
             username = form.cleaned_data["username"]
             password = form.cleaned_data["password1"]
             email = form.cleaned_data["email"]
             token = uuid.uuid4()
 
-            link = reverse("verify-email", kwargs={"token": token})
-            try:
-                send_mail(
-                    "Subject",
-                    '<a href="%s">Click here</a>' % link,
-                    "chungtrinh2k2@gmail.com",
-                    [email],
-                )
-            except BadHeaderError:
-                return HttpResponse("Invalid header found.")
+            link = HOST + reverse("verify-email", kwargs={"token": token})
+
+            send_mail_custom(
+                "Verify your email from Pitch App",
+                email,
+                None,
+                "email/verify_email_signup.html",
+                link=link,
+                username=username,
+            )
 
             user = User.objects.create_user(username, email, password)
             user.is_active = False
@@ -49,8 +50,6 @@ def verify_email(request, token):
     if EmailVerify.objects.filter(token=token).exists():
         userVerify = EmailVerify.objects.get(token=token)
         user = userVerify.user
-        print(user.email)
-        print(user.username)
         user.is_active = True
         user.save()
     else:

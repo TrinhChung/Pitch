@@ -168,3 +168,4 @@ EMAIL_HOST_PASSWORD = "ptfanznmenvpxfij"
 DEFAULT_FROM_EMAIL = "chungtrinh2k2@gmail.com"
 
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+HOST = "http://localhost:8000" if IS_PRODUCT else "http://localhost:8000"
