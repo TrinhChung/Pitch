@@ -1,15 +1,15 @@
 from django.shortcuts import render
 from .forms import RegisterForm
-from django.urls import reverse_lazy, reverse
+from django.urls import reverse
 from django.shortcuts import render
 from django.contrib.auth.models import User
-from django.core.mail import BadHeaderError, send_mail
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponseRedirect
 import uuid
 from .models import EmailVerify
 from account.mail import send_mail_custom
 from project1.settings import HOST
 from django.utils.translation import gettext
+
 
 def sign_up(request):
     if request.method == "POST":
@@ -49,8 +49,7 @@ def verify_email(request, token):
         user = userVerify.user
         user.is_active = True
         user.save()
+        userVerify.delete()
+        return render(request, "registration/verify_email_success.html")
     else:
-        return HttpResponse(gettext("Token has been used or does not exist."))
-
-    context = {"var": "hello"}
-    return render(request, "registration/verify-email.html", context=context)
+        return render(request, "registration/verify_email_fail.html")
