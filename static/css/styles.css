@@ -61,3 +61,19 @@
 .button-remove:hover {
   cursor: pointer;
 }
+
+.border-none {
+  border: none !important;
+}
+
+.fs-12 {
+  font-size: 12px !important;
+}
+
+.fs-14 {
+  font-size: 14px !important;
+}
+
+.green {
+  color: rgb(0, 122, 0);
+}
