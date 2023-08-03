@@ -1,0 +1,109 @@
+version: "3"
+volumes:
+  static_volume:
+  media_volume:
+  prometheus-data:
+    driver: local
+  grafana-data:
+    driver: local
+services:
+  my-mysql:
+    container_name: mysql
+    image: mysql:8.0
+    hostname: mysql
+    environment:
+      - MYSQL_DATABASE=${NAME_DB}
+      - MYSQL_USER=siteuser
+      - MYSQL_PASSWORD=${PASS_DB}
+      - MYSQL_ROOT_PASSWORD=${PASS_DB}
+    volumes:
+      - /tmp/app/mysqld:/run/mysqld
+      - /root/config/project1/db:/var/lib/mysql
+    restart: always
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+    ports:
+      - 3306:3306
+    command: --default-authentication-plugin=mysql_native_password
+  my-django:
+    container_name: django
+    image: django-docker:0.0.1
+    build: .
+    command:
+      sh -c "python manage.py migrate && python manage.py collectstatic --no-input --clear &&
+      export PRODUCT=1 && gunicorn project1.wsgi runserver --bind 0.0.0.0:8000"
+    expose:
+      - 8000
+    # restart: always
+    volumes:
+      - /tmp/app/mysqld:/var/run/mysqld
+      - .:/app
+      - static_volume:/app/staticfiles
+      - media_volume:/app/media/
+    depends_on:
+      my-mysql:
+        condition: service_healthy
+
+  my-nginx:
+    container_name: nginx
+    image: nginx:1.23.3
+    hostname: nginx
+    volumes:
+      - static_volume:/app/staticfiles
+      - media_volume:/app/media/
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+      - /root/ssl/:/etc/nginx/certs/
+    ports:
+      - 80:80
+    restart: always
+    depends_on:
+      - my-django
+  # cadvisor:
+  #   image: gcr.io/cadvisor/cadvisor
+  #   container_name: cadvisor
+  #   # ports:
+  #   #   - "8080:8080"
+  #   volumes:
+  #     - /:/rootfs:ro
+  #     - /var/run:/var/run:ro
+  #     - /sys:/sys:ro
+  #     - /var/lib/docker/:/var/lib/docker:ro
+  #     - /dev/disk/:/dev/disk:ro
+  #   depends_on:
+  #     - my-django
+
+  # prometheus:
+  #   image: prom/prometheus:latest
+  #   container_name: prometheus
+  #   # ports:
+  #   #   - "9090:9090"
+  #   volumes:
+  #     - ./prometheus:/etc/prometheus
+  #     - prometheus-data:/prometheus
+  #   restart: always
+  #   command:
+  #     - "--config.file=/etc/prometheus/prometheus.yml"
+  #   depends_on:
+  #     - cadvisor
+
+  # grafana:
+  #   image: grafana/grafana:latest
+  #   container_name: grafana
+  #   expose:
+  #     - 3000
+  #   volumes:
+  #     - grafana-data:/var/lib/grafana
+  #   environment:
+  #     - GF_SMTP_ENABLED=true
+  #     - GF_SMTP_HOST=smtp.gmail.com:587
+  #     - GF_SMTP_USER=${MAIL}
+  #     - GF_SMTP_PASSWORD=${PASS}
+  #     - GF_SMTP_FROM_ADDRESS=${MAIL}
+  #     - GF_SERVER_DOMAIN=recurup.com
+  #     - GF_SERVER_ROOT_URL=${GF_URL}
+  #     - GF_SERVER_SERVE_FROM_SUB_PATH=true
+  #   restart: always
+  #   depends_on:
+  #     - prometheus

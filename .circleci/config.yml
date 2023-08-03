@@ -1,0 +1,92 @@
+version: 2.1
+orbs:
+  docker: circleci/docker@2.2.0
+
+jobs:
+  django-test:
+    machine:
+      image: ubuntu-2004:current
+      docker_layer_caching: true
+    steps:
+      - checkout
+      - run:
+          name: Install Docker Compose
+          environment:
+            COMPOSE_VERSION: "2.15.1"
+          command: |
+            sudo apt update
+            sudo apt install apt-transport-https ca-certificates curl software-properties-common
+            curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+            sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu focal stable"
+            apt-cache policy docker-ce
+            sudo apt install docker-ce docker-compose-plugin
+            sudo usermod -aG docker ${USER}
+      - run:
+          name: create file
+          command: |
+            ls
+            sudo mkdir /root/ssl/
+            sudo touch /root/ssl/certificate.pem
+            sudo touch /root/ssl/private.pem
+            sudo touch ./.env
+
+            sudo echo MAIL=${MAIL} | sudo tee -a ./.env > /dev/null 
+            sudo echo PASS=${EMAIL_PASS} | sudo tee -a ./.env > /dev/null 
+            sudo echo EMAIL_PORT=587 | sudo tee -a ./.env > /dev/null 
+            sudo echo NAME_DB=project1 | sudo tee -a ./.env > /dev/null 
+            sudo echo USER_DB=${USER_DB} | sudo tee -a ./.env > /dev/null 
+            sudo echo PASS_DB=${PASS_DB} | sudo tee -a ./.env > /dev/null 
+            sudo echo PORT_DB=${PORT_DB} | sudo tee -a ./.env > /dev/null
+      - run:
+          name: Start container and verify it's working
+          command: |
+            docker-compose up -d
+      - run: |
+          docker ps
+          docker network ls
+      - run:
+          name: wait container mysql
+          command: |
+            echo "Waiting for MYSQL"
+            while ! nc -vz localhost 3306
+            do
+              sleep 1
+              echo "."
+            done
+            echo "connect success"
+      - run:
+          name: "migrate and seed"
+          command: |
+            docker-compose run my-django ./manage.py makemigrations
+            docker-compose run my-django ./manage.py migrate
+      - run:
+          name: "create static file"
+          command: |
+            docker-compose run my-django ./manage.py collectstatic --no-input --clear
+      - run:
+          name: "Run test"
+          command: |
+            docker-compose run my-django ./manage.py test
+      - run:
+          name: docker-compose down
+          command: docker-compose down
+  build-and-push:
+    machine:
+      image: ubuntu-2004:current
+    steps:
+      - add_ssh_keys:
+          fingerprints:
+            - "7e:e1:29:af:ee:10:35:49:18:40:f0:a2:b2:c6:62:e9"
+      - run: ssh -oStrictHostKeyChecking=no -v $USER_NAME@$HOST_NAME "./config/project1/deploy.sh"
+
+workflows:
+  build-deploy:
+    jobs:
+      - django-test
+      - build-and-push:
+          requires:
+            - django-test
+          filters:
+            branches:
+              only:
+                - deploy

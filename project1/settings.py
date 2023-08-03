@@ -50,7 +50,7 @@ LOGGING = {
 
 ALLOWED_HOSTS = ["*"]
 
-SECURE_SSL_REDIRECT = IS_PRODUCT
+SECURE_SSL_REDIRECT = False
 SESSION_COOKIE_SECURE = IS_PRODUCT
 CSRF_COOKIE_SECURE = IS_PRODUCT
 SECURE_HSTS_SECONDS = IS_PRODUCT * 7200
@@ -178,4 +178,5 @@ EMAIL_FILE_PATH = "/tmp/app-messages"
 
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
-HOST = "http://localhost:8000" if IS_PRODUCT else "http://localhost:8000"
+HOST = "http://psycho.recurup.com" if IS_PRODUCT else "http://localhost:8000"
+CSRF_TRUSTED_ORIGINS = ["https://*.recurup.com"]

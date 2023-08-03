@@ -7,10 +7,10 @@ import datetime
 from django.core import mail
 from django.contrib.auth.models import User
 from account.models import EmailVerify
-from django.core.exceptions import ObjectDoesNotExist
 import uuid
 from pitch.models import Order
 from django.db import connections
+
 
 class HomeViewTest(TestCase):
     @classmethod
