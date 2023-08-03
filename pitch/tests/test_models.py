@@ -4,14 +4,12 @@ from django.conf import settings
 from pitch.models import Order, Comment, Voucher, Pitch, Image
 from django.contrib.auth.models import User
 
+
 class VoucherModelTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):
         cls.voucher = Voucher.objects.create(
-            name="Test Voucher",
-            min_cost=1000,
-            discount=500,
-            count=10
+            name="Test Voucher", min_cost=1000, discount=500, count=10
         )
 
     def test_attribute(self):
@@ -46,7 +44,7 @@ class PitchModelTestCase(TestCase):
             avg_rating=4.5,
             size="1",
             surface="n",
-            price=1000
+            price=1000,
         )
 
     def test_attribute(self):
@@ -80,15 +78,13 @@ class PitchModelTestCase(TestCase):
 
     def test_object_name(self):
         self.assertEqual(str(self.pitch), self.pitch.title)
-        
+
+
 class OrderModelTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):
         cls.voucher = Voucher.objects.create(
-            name="Test Voucher",
-            min_cost=1000,
-            discount=500,
-            count=10
+            name="Test Voucher", min_cost=1000, discount=500, count=10
         )
         cls.pitch = Pitch.objects.create(
             address="Test Address",
@@ -98,9 +94,11 @@ class OrderModelTestCase(TestCase):
             avg_rating=4.5,
             size="1",
             surface="n",
-            price=1000
+            price=1000,
         )
-        cls.renter = User.objects.create_user(username="testuser", password="testpassword")
+        cls.renter = User.objects.create_user(
+            username="testuser", password="testpassword"
+        )
         cls.order = Order.objects.create(
             time_start="2023-07-20 10:00:00",
             time_end="2023-07-20 12:00:00",
@@ -108,7 +106,8 @@ class OrderModelTestCase(TestCase):
             price=1000,
             renter=cls.renter,
             voucher=cls.voucher,
-            cost=5000
+            cost=5000,
+            pitch=cls.pitch,
         )
 
     def test_attribute(self):
@@ -146,14 +145,13 @@ class CommentModelTestCase(TestCase):
             avg_rating=4.5,
             size="1",
             surface="n",
-            price=1000
+            price=1000,
         )
-        cls.renter = User.objects.create_user(username="testuser", password="testpassword")
+        cls.renter = User.objects.create_user(
+            username="testuser", password="testpassword"
+        )
         cls.comment = Comment.objects.create(
-            renter=cls.renter,
-            pitch=cls.pitch,
-            rating=4,
-            comment="Test Comment"
+            renter=cls.renter, pitch=cls.pitch, rating=4, comment="Test Comment"
         )
 
     def test_attribute(self):
@@ -171,7 +169,8 @@ class CommentModelTestCase(TestCase):
 
     def __str__(self):
         return f"Order {self.pk} - {self.renter.username}"
-        
+
+
 class ImageModelTestCase(TestCase):
     def setUp(self):
         self.pitch = Pitch.objects.create(
@@ -187,10 +186,9 @@ class ImageModelTestCase(TestCase):
         self.image = Image.objects.create(pitch=self.pitch)
 
     def test_image_default(self):
-        default_image_path = "uploads/default-image.jpg"
-        self.assertEqual(self.image.image.url, "/uploads/default-image.jpg")
+        default_image_path = "/media/default-image.jpg"
+        self.assertEqual(self.image.image.url, default_image_path)
 
     def test_image_upload_to(self):
         expected_path = os.path.join(settings.MEDIA_ROOT, "default-image.jpg")
         self.assertEqual(self.image.image.path, expected_path)
-        
