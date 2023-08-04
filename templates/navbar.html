@@ -24,15 +24,6 @@
             <a href="#">Name: {{ user.get_username }}</a>
             <ul class="navbar-dropdown">
               <li>
-                <a href="#!">{% trans "History rental" %}</a>
-              </li>
-              <li>
-                <a href="{% url 'password_change' %}">{% trans "Change password" %}</a>
-              </li>
-              <li>
-                <a href="{% url 'password_reset' %}">{% trans "Reset password" %}</a>
-              </li>
-              <li>
                 <a href="{% url 'logout' %}?next={{ request.path }}">{% trans "Logout" %}</a>
               </li>
             </ul>
