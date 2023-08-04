@@ -19,7 +19,7 @@ from project1.settings import HOST
 from django.db.models import Q, Avg
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.paginator import Paginator
-from .forms import SearchForm,CommentForm
+from .forms import SearchForm, CommentForm
 from django.shortcuts import redirect, get_object_or_404
 from django.db import DatabaseError, transaction
 
@@ -42,6 +42,7 @@ def index(request):
     context = {"pitch_list": pitches}
     return render(request, "index.html", context=context)
 
+
 @transaction.atomic
 @login_required
 def pitch_detail(request, pk):
@@ -55,7 +56,7 @@ def pitch_detail(request, pk):
     context["images"] = context["pitch"].image.all()
 
     comments = Comment.objects.filter(pitch=pitch)
-    context['comments'] = comments
+    context["comments"] = comments
 
     if request.method == "POST":
         form = RentalPitchModelForm(request.POST, pitch=pitch)
@@ -65,7 +66,6 @@ def pitch_detail(request, pk):
             if comment_form.is_valid():
                 comment = comment_form.cleaned_data["comment"]
                 rating = comment_form.cleaned_data["rating"]
-                print("content",comment)
                 Comment.objects.create(
                     renter=request.user,
                     pitch=pitch,
@@ -139,13 +139,8 @@ def pitch_detail(request, pk):
             },
             pitch=pitch,
         )
-        context['update_comment_form'] = CommentForm()
+        context["update_comment_form"] = CommentForm()
         context["comment_form"] = CommentForm()
-
-    with transaction.atomic():
-        avg_rating = comments.aggregate(Avg('rating'))['rating__avg']
-        pitch.avg_rating = avg_rating
-        pitch.save()
 
     paginator = Paginator(comments, 3)
     page_number = request.GET.get("page")
@@ -270,16 +265,17 @@ def search_view(request):
 
     return render(request, "pitch/pitch_search.html", context)
 
+
 def create_comment(request, pk):
     pitch = get_object_or_404(Pitch, pk=pk)
-    if request.method == 'POST':
+    if request.method == "POST":
         form = CommentForm(request.POST)
         if form.is_valid():
             comment = form.save(commit=False)
             comment.pitch = pitch
             comment.renter = request.user
             comment.save()
-            return redirect('pitch-detail', pk=pk)
+            return redirect("pitch-detail", pk=pk)
     else:
         form = CommentForm()
-    return render(request, 'pitch/create_comment.html', {'form': form})
+    return render(request, "pitch/create_comment.html", {"form": form})
